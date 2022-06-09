@@ -1,0 +1,656 @@
+openapi: '3.0.3'
+info:
+  title: ATLAS Service Template - Animal data
+  description: Setup and synchronize the animals of a farm and their organization in groups and pens.
+  version: 0.0.1
+tags:
+  - name: Barn Information
+  - name: Animal Information
+  - name: Feedgroup Information
+  - name: Subscriptions
+security:
+  - bearerAuth: []
+paths:
+  /barns:
+    get:
+      summary: List all barns
+      tags:
+        - Barn Information
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Barn'
+  /barns/{urn}:
+    get:
+      summary: Get a single barn
+      tags:
+        - Barn Information
+      parameters:
+        - name: urn
+          in: path
+          description: urn of the Barn
+          required: true
+          schema:
+            $ref: '#/components/schemas/URN'
+      responses:
+        200:
+          description: 'success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Barn'
+
+  /pens:
+    get:
+      summary: List all pens
+      tags:
+        - Barn Information
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pen'
+  /pens/{urn}:
+    get:
+      summary: Get a single pen
+      tags:
+        - Barn Information
+      parameters:
+        - name: urn
+          in: path
+          description: urn of the Pen
+          required: true
+          schema:
+            $ref: '#/components/schemas/URN'
+      responses:
+        200:
+          description: 'success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pen'
+
+  /animals:
+    get:
+      summary: List all animals
+      tags:
+        - Animal Information
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Animal'
+    post:
+      summary: Create a new animal-entry
+      description: This will archive all existing entries for that animal. In response there is a new URN for this state. The existing URNs reflect still the old state of that animal. Missing fields will be added from the last entry of this animal.
+      tags:
+        - Animal Information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Animal'
+      responses:
+        201:
+          description: 'saved successful'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      urn:
+                        $ref: '#/components/schemas/URN'
+                    additionalProperties: false
+                    required:
+                      - urn
+                    example:
+                      urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+                additionalProperties: false
+                required:
+                  - success
+  /animals/{urn}:
+    get:
+      summary: Get single animal
+      tags:
+        - Animal Information
+      parameters:
+        - name: urn
+          in: path
+          description: urn of the Animal
+          required: true
+          schema:
+            $ref: '#/components/schemas/URN'
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+
+  /feedgroups:
+    get:
+      summary: List all feedgroups
+      tags:
+        - Feedgroup Information
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feedgroup'
+  /feedgroups/{urn}:
+    get:
+      summary: Get single feedgroup
+      tags:
+        - Feedgroup Information
+      parameters:
+        - name: urn
+          in: path
+          description: urn of the Feedgroup
+          required: true
+          schema:
+            $ref: '#/components/schemas/URN'
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedgroup'
+
+  /subscriptions:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Subscriptions
+      summary: Registers a notification URL
+      description: _optional_ Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
+      operationId: subscribe
+      requestBody:
+        description: subscription parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notification_url:
+                  type: string
+                  format: uri
+                  description: A subscription's notification_url is invoked with a POST (WITHOUT Authorization headers), containing a Notification request body (see schema below)
+              required:
+                - notification_url
+              example:
+                notification_url: https://acme.com/my_notification_handler
+      responses:
+        '201':
+          description: subscription created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: the service-generated id for the new subscription
+                  expiration_date:
+                    type: string
+                    format: date-time
+                    description: date at which the subscription expires (auto-delete)
+              example:
+                id: 550ef2f0-02b6-40b2-bed9-e20816d20255
+                expiration_date: '2021-05-23T18:25:43.511Z'
+        '400':
+          description: Invalid or missing parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '401':
+          description: Invalid or missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+              example:
+                message: A subscription already exists for this notification_url
+                errors:
+                  - 550ef2f0-02b6-40b2-bed9-e20816d20255
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+              example: A subscription 550ef2f0-02b6-40b2-bed9-e20816d20255 already exists for this notification_url
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+  /subscriptions/{id}:
+    patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Subscriptions
+      summary: Refreshes an existing subscription
+      description: _optional_ Refreshes an existing subscription (refresh_subscription)
+      operationId: refresh_subscription
+      parameters:
+        - description: the id of a subscription
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  expiration_date:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 UTC date/time at which the subscription expires (auto-delete)
+              example:
+                id: 550ef2f0-02b6-40b2-bed9-e20816d20255
+                expiration_date: '2021-06-23T18:25:43.511Z'
+        '400':
+          description: Invalid or missing parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '401':
+          description: Invalid or missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '404':
+          description: The subscription was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '410':
+          description: The subscription is expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Subscriptions
+      summary: Cancels a subscription
+      description: _optional_ Cancels a previously created subscription (unsubscribe)
+      operationId: unsubscribe
+      parameters:
+        - description: the id of a subscription
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: string
+      responses:
+        '204':
+          description: successful operation
+        '401':
+          description: Invalid or missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '404':
+          description: The subscription was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedError'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SimpleError'
+
+components:
+  schemas:
+    URN:
+      type: string
+      pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
+      description: 'Uniform resource name of a field with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service. Changes for each change to have historical correct linked data.'
+    Feedgroup:
+      type: object
+      properties:
+        urn:
+          $ref: '#/components/schemas/URN'
+        history_id:
+          type: string
+          description: 'uuid which will be valid also after a change'
+        date_created:
+          type: string
+          format: date-time
+        date_last_updated:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - urn
+        - date_created
+        - date_last_updated
+        - name
+      example:
+        urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        date_created: '2022-03-14T00:00:00'
+        date_last_update: '2022-05-04T00:00:42'
+        archived: false
+        name: 'Highyield 1'
+        description: '1st Pen new stable left side'
+    Barn:
+      type: object
+      properties:
+        urn:
+          $ref: '#/components/schemas/URN'
+        date_created:
+          type: string
+          format: date-time
+        date_last_updated:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        name:
+          type: string
+        description:
+          type: string
+        geometry:
+          $ref: 'https://geojson.org/schema/GeoJSON.json'
+      required:
+        - urn
+        - date_created
+        - date_last_updated
+        - name
+      example:
+        urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        date_created: '2022-03-14T00:00:00'
+        date_last_update: '2022-05-04T00:00:42'
+        archived: false
+        name: '1st Barn new'
+        description: ''
+        geometry:
+          type: 'Polygon'
+          coordinates:
+            [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
+
+    Pen:
+      type: object
+      properties:
+        urn:
+          $ref: '#/components/schemas/URN'
+        history_id:
+          type: string
+          description: 'uuid which will be valid also after a change'
+        date_created:
+          type: string
+          format: date-time
+        date_last_updated:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        name:
+          type: string
+        description:
+          type: string
+        max_number_animals:
+          type: integer
+          minimum: 0
+        feedgroup_urn:
+          $ref: '#/components/schemas/URN'
+        barn_urn:
+          $ref: '#/components/schemas/URN'
+        geometry:
+          $ref: 'https://geojson.org/schema/GeoJSON.json'
+      required:
+        - urn
+        - date_created
+        - date_last_updated
+        - name
+        - number_animals
+      example:
+        urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        date_created: '2022-03-14T00:00:00'
+        date_last_update: '2022-05-04T00:00:42'
+        archived: false
+        name: 'Highyield 1'
+        description: '1st Pen new stable left side'
+        max_number_animals: 60
+        feedgroup_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        barn_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        geometry:
+          type: 'Polygon'
+          coordinates:
+            [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
+    Animal:
+      type: object
+      properties:
+        urn:
+          $ref: '#/components/schemas/URN'
+        date_created:
+          type: string
+          format: date-time
+        date_last_updated:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        name:
+          type: string
+        description:
+          type: string
+        public_identifier:
+          type: string
+          description: 'most animals are registered in public-registers, use that e.g. ear-number here'
+        farm_identifier:
+          type: string
+          description: 'most farms have their own numbering for the cows, use that here'
+        pen_urn:
+          $ref: '#/components/schemas/URN'
+        date_birth:
+          type: string
+          format: date-time
+          description: date when this animal was born
+
+        date_arrival:
+          type: string
+          format: date-time
+          description: date when the animal arrived at the current farm
+        arrival_reason:
+          type: string
+          description: reason why this animal arrives on the farm, **todo** extend enum
+          enum:
+            - 'born'
+            - 'buyed'
+        date_departure:
+          type: string
+          format: date-time
+          description: date when the animal left the current farm
+        departure_reason:
+          type: string
+          description: reason why this animal arrives on the farm, **todo** extend enum
+          enum:
+            - 'death'
+            - 'sold'
+        original_public_identifier:
+          type: string
+          description: if the animal loose their identity or must otherwise be re-identified, this is the reference to the original identity
+        sex:
+          type: string
+          enum: ['f', 'm']
+        breed:
+          type: string
+          description: 'The breed of the animal, or in the case of cross breed animals, the main breed percentages in the animal s breeding. **todo**: add anim with breeds like ADIS Codeset 2 - C_RASSE'
+        species:
+          type: string
+          description: 'Species of that animal, **todo**: is there an official enum which we can use here?'
+          enum: ['cattle', 'pig', 'chicken']
+      required:
+        - urn
+        - date_created
+        - date_last_updated
+        - public_identifier
+        - pen_urn
+        - species
+      example:
+        urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        date_created: '2022-03-14T00:00:00'
+        date_last_update: '2022-05-04T00:00:42'
+        archived: false
+        name: 'Marta'
+        public_identifier: 'DE 123456789'
+        farm_identifier: '674'
+        pen_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
+        date_birth: '2021-03-06T12:34:45'
+        sex: 'f'
+        species: 'cattle'
+    Notification:
+      description: Payload sent when invoking notification_url
+      type: object
+      properties:
+        subscription_id:
+          type: string
+          description: the id of a subscription
+        date:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC date/time at which the notification was originally triggered (regardless of retries)
+        urn:
+          type: string
+          description: the URN of the changed item (urn:<service_id>:<internal_id>)
+        event:
+          type: string
+          enum:
+            - CREATED
+            - DELETED
+            - UPDATED
+        changes:
+          description: attribute group where a change occurred (only present when event=UPDATED)
+          type: array
+          items:
+            type: string
+            enum:
+              - feedgroup
+              - barn
+              - pen
+              - animal
+            example: animal
+    SimpleError:
+      type: string
+      description: Plain text message (may be empty).
+      example: optional error message
+    DetailedError:
+      type: object
+      description: This defines the structure of an error payload when one is present. Actual messages and additional error information content may change from one implementation to another
+      properties:
+        message:
+          type: string
+          description: error description
+        errors:
+          type: array
+          items:
+            type: string
+          description: Additional detailed information
+      required:
+        - message
+      example:
+        message: general error message
+        errors:
+          - optional
+          - additional
+          - details
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

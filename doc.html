@@ -1,0 +1,181 @@
+<html>
+<head>
+    <style type="text/css">
+        body { font-family: courier; font-size:12px; margin-left: 42px; width: 465px; white-space: pre-line; }
+        h2 { margin: 10px 0 0 -22px; font-size:12px; padding: 0 !important }
+        table { font-size: 10px; margin-left: -22px; width: 480px; overflow-wrap: break-work; }
+        table td { overflow-wrap: break-work; }
+        div.header { padding: 0; margin: 0 0 0 -22px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+ATLAS Service Template Specification
+Name                                                  animal_data
+Version                                                     0.0.1
+Status                                                      DRAFT
+Author(s)                                 J. V&ouml;lker (fodjan GmbH)
+</div>
+
+<h2>The "animal_data" ATLAS Service Template</h2>
+<div style="margin-left: -22px;">
+Abstract
+
+This document describes the specification for a general animal_data service whose purpose is to provide the synchronisation of a herd of animals and its organization structure between services. This service abstract from the different species and use only generic data for synchronization.
+</div>
+<h2>1 Introduction</h2>
+
+To citate the ICAR Guidelines - Procedure 3 of Section 15 - Animal Data <a href="https://www.icar.org/Guidelines/15-Procedure-3-Animal-Data.pdf">https://www.icar.org/Guidelines/15-Procedure-3-Animal-Data.pdf</a> : A carefully maintained list of animals in the herd is a prerequisite of reliable animal recording. The animal lists on the equipment and on the farm management system are likely to be different because of:
+
+a. Different input sources (manual maintenance by farmer, legal registration in the farm management system).
+b. Different availability of data.
+
+The business process "Exchange of Animal Data" is designed to:
+
+c. initialize the database of the equipment or herd management system.
+d. propagate new or changed data to or from the farm management system.
+e. help detecting data conflicts earlier
+
+<h2>2 Terminology</h2>
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and indicate requirement levels for compliant implementations.
+
+The notation "[xxx]" (xxx in square brackets) is equivalent to "array of xxx".
+
+When used alone, the term "animal_data" refers to "animal_data service template". Instead, "animal_data service" is equivalent to "a service implementing the animal_data service template".
+
+<h2>3 Pre-requisites</h2>
+
+A basic understanding of herd management.
+
+<h2>4 animal_data Use Scenarios</h2>
+
+animal_data represents animals and also their organisation in pens and feedgroups. It is intentionally species-neutral because the basic structure is very similar for most of the species.
+
+Barns are the physical locations where animals are standing in so they are the basis for feeding, observation and many other interactions with the animals.
+
+Simple CRUD API to manage the existing feedgroups, barns and animals on a farm.
+
+<img src="doc/dairy_cows.png" style="width:450px" />
+<img src="doc/poultry.png" style="width:375px" />
+<img src="doc/pigs.png" style="width:375px" />
+
+Every animal is located in a pen - which is a physical seperated group of animals. Multiple pens may get the same ration - so they are grouped into a virtual feedgroup. All of that is grouped into a farm.
+Every relation is 1:n. That means every animals has at one point in time exactly one pen, one feedgroup and one farm.
+But there might also be the setup, that a partner doesn’t have the concept of feedgroups. For that case, pens are directly assigned to farms and the feedgroup-assignment is optional.
+todo: list some specific use-cases
+
+<h2>5 Service Template API Overview</h2>
+
+TBD
+
+<h2>6 Data Formats</h2>
+
+The diagram below illustrates the entity-relation model of animals, pen, barns and feedinggroups:
+
+<img src="doc/data_model.png" style="width:450px" />
+
+Data recorded for a single animal follow the ICAR Guidelines (Section 1 General Rules: <a href="https://www.icar.org/Guidelines/01-General-Rules.pdf">https://www.icar.org/Guidelines/01-General-Rules.pdf</a>).
+
+Data per entity:
+
+- Farm: urn, date_created, date_last_update, name, address
+- Feedgroup: urn, date_created, date_last_update, name, description
+- Pen: urn, date_created, date_last_update, name, description, max_number_animals, farm_urn, feedgroup_urn Animal: urn, date_created, date_last_update, public_identifier, name, date_birth, pen_urn
+
+Other species-specific data will be handled by other services.
+
+<h2>7 Access and Authentication</h2>
+
+Farmers MUST have an account setup on a animal_data service in order to authenticate and access API endpoints. The service implementor is responsible for the creation of accounts; it is not covered in the ATLAS Service Template specifications.
+
+Unless specifically documented in the OpenAPI specifications, all operation must include credentials in form of Bearer authentication (also called token authentication). Clients can obtain an access token on behalf of their user from the service's authorization server (see ATLAS service pairing).
+
+Some of the information held by animal_data services are considered to be sensitive from a GDPR perspective.The service's authorization server MUST request the client's end-user consent at service pairing time in order to deliver an access token.
+
+<h2>8 Dynamic Behaviour</h2>
+
+The purpose of the diagrams in this section is to illustrate communication patterns, more complex than plain request/response API calls, that involve several interactions and/or asynchronous behaviour. Even though a sequence diagram representation is used, the diagrams are by no means to be interpreted as UML Sequence Diagrams. Specifically, in the spirit of focusing on functional behaviour and readability, error handling is deliberately not covered in the diagram.
+
+<h2>8.1 Subscriptions</h2>
+
+The service template mandates a "notification event" pattern. In this pattern, only the information that an event (creation, update, deletion) has occurred will be sent (see Subscription Notification), and in case of updates, the kind of information that changed. It is up to the subscriber to decide whether the event is relevant and whether to perform a data query upon reception of the notification or not.
+
+<img src="doc/subscription.png" style="width: 420px"/>
+
+A notification is considered successful if the client returns a http result code 2XX.
+
+Errors may occur during notification delivery. Depending on the type of error, services must react in different ways:
+
+i) Network error - the connection to the client's host (from notification URL) cannot be established. The service MUST retry a certain number of times. The number of retries and possible backoff strategy is left at the discretion of the service implementer.
+
+ii) Server errors (5XX result code) - these errors are potentially transient. The same strategy as for Network errors SHOULD be applied.
+
+iii) Client errors (4XX result code) - typically when the notification URL is invalid, or the authentication is invalid/expired. 4XX errors should never be sent for transient client-side conditions and therefore services SHOULD NOT attempt retries.
+
+Upon an excessive number of errors, services MAY automatically cancel a subscription. In that case, they SHOULD perform a "soft" cancellation where, instead of deleting the subscription record, a subscription can be reactivated upon reception of a refresh_subscription call.
+
+<h2>8.2 Subscription Notification</h2>
+
+The notification URL supplied by the subscriber MUST be invoked with an HTTP POST command.
+
+When a notification authorisation parameter was supplied by the subscriber, the service MUST include a bearer token authentication in the form of an HTTP header:
+
+Authorization: bearer &lt;notification authorization&gt;
+
+A notification payload describing the type of event MUST be included:
+<pre>
+  {
+    "subscription_id": "&lt;my subscription id&gt;",
+    "date": "&lt;ISO 8601 UTC date/time&gt;",
+    "field_urn": "&lt;target field URN&gt;",
+    "event ": "CREATED|UPDATED|DELETED",
+    "changes": ["attributes"]
+  }
+</pre>
+In case of an UPDATE event, services SHOULD include the name of the attributes that were changed in the form of attribute JSONPaths. This allows subscribers to filter relevant notifications based on the field data that is relevant to their purpose. In the absence of changed attributes information, the subscriber must assume that all attributes have changed.
+
+<pre>
+Notifications are generated for the following "attributes":
+    - base
+    - crop (for any change in crop details or crop_history)
+    - driving_path (for any change in driving path)
+    - applications (after application results are added)
+</pre>
+Implementations of animal_data are responsible for providing end-user configuration and management tools in their proprietary user interface, such as import from a shapefile, boundary editing in the browser, ... Changes generated by these tools must generate an appropriate notification where relevant.
+
+<h2>ANNEX 1 - Animal Mapping</h2>
+
+Several standards implement description of animals and their movement. For easier implementation of the ATLAS standard, this is the table how the data can be converted between the standards.
+
+<table>
+    <tr><td>ATLAS</td><td style="width:100px">ICAR</td><td>ADIS/ADED</td></tr>
+    <tr><td>public_identifier</td><td>AnimalCoreDataSetType/<wbr>Identifier</td><td>900080/animal-id</td></tr>
+    <tr><td>farm_identifier</td><td>AnimalCoreDataSetType/<wbr>AlternativeIdentity</td><td>900070/num-of-shed ?</td></tr>
+    <tr><td>original_public_identifier</td><td>-</td><td>-</td></tr>
+    <tr><td>specie</td><td>AnimalCoreDataSetType/<wbr>Specie</td><td>-</td></tr>
+    <tr><td>sex</td><td>AnimalCoreDataSetType/<wbr>Gender</td><td>800111/sex (<a href="https://www.dlqdata.de/ddm/pages/public/dictionarymgmt/codesetDictionary.xhtml?year=2022&keyNr=8012">enum</a>)</td></tr>
+    <tr><td>date_birth</td><td>AnimalCoreDataSetType/<wbr>Birth</td><td>900053/birthday</td></tr>
+    <tr><td>breed</td><td>AnimalCoreDataSetType/<wbr>Breed</td><td>800030/breed (<a href="https://www.dlqdata.de/ddm/pages/public/dictionarymgmt/codesetDictionary.xhtml?year=2022&keyNr=2">enum</a>)</td></tr>
+    <tr><td>-</td><td>AnimalCoreDataSetType/<wbr>Sire</td><td>800032/animal-id-father</td></tr>
+    <tr><td>-</td><td>AnimalCoreDataSetType/<wbr>RecipientDam</td><td>-</td></tr>
+    <tr><td>-</td><td>AnimalCoreDataSetType/<wbr>GeneticDam</td><td>800035/animal-id-mother</td></tr>
+    <tr><td>name</td><td>-</td><td>900045/name</td></tr>
+    <tr><td>description</td><td>-</td><td>-</td></tr>
+    <tr><td>date_arrival</td><td>ArrivalCoreDataSetType/<wbr>ArrivalDate</td><td>900034/date-of-arrival</td></tr>
+    <tr><td>arrival_reason</td><td>ArrivalCoreDataSetType/<wbr>ArrivalReasonCode</td><td>-</td></tr>
+    <tr><td>-</td><td>ArrivalCoreDataSetType/<wbr>OriginLocation</td><td>-</td></tr>
+    <tr><td>-</td><td>ArrivalCoreDataSetType/<wbr>LocalAdditionalData</td><td>-</td></tr>
+    <tr><td>date_departure</td><td>DepartureCoreDataSetType/<wbr>DepartureDate</td><td>900038/date-of-leaving</td></tr>
+    <tr><td>departure_reason</td><td>DepartureCoreDataSetType/<wbr>DepartureReasonCode</td><td>800041/reason-of-leaving (<a href="https://www.dlqdata.de/ddm/pages/public/dictionarymgmt/codesetDictionary.xhtml?year=2022&keyNr=3">enum</a>)</td></tr>
+    <tr><td>-</td><td>DepartureCoreDataSetType/<wbr>DestinationLocation</td><td>-</td></tr>
+    <tr><td>-</td><td>DepartureCoreDataSetType/<wbr>LocalAdditionalData</td><td>-</td></tr>
+    <tr><td>-</td><td>-</td><td>800042/kind-of-cattle (<a href="https://www.dlqdata.de/ddm/pages/public/dictionarymgmt/codesetDictionary.xhtml?year=2022&keyNr=4">enum</a>)</td></tr>
+    <tr><td>-</td><td>-</td><td>800101/breeder</td></tr>
+    <tr><td>-</td><td>-</td><td>800113/weight-at-birth</td></tr>
+    <tr><td>-</td><td>-</td><td>810026/coat-colour (<a href="https://www.dlqdata.de/ddm/pages/public/dictionarymgmt/codesetDictionary.xhtml?year=2022&keyNr=810026">enum</a>)</td></tr>
+</table>
+
+</body>
+</html>
