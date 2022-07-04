@@ -2,7 +2,7 @@ openapi: '3.0.3'
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
-  version: 0.0.5
+  version: 0.0.1
   contact:
     email: j.voelker@fodjan.de
 tags:
@@ -99,6 +99,11 @@ paths:
             type: string
             format: date-time
             example: '2022-02-02T12:22:00'
+        - name: pen_urn
+          in: query
+          description: Return all animals in the given pen
+          schema:
+            $ref: '#/components/schemas/URN'
       responses:
         200:
           description: 'successful operation'
