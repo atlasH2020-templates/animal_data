@@ -439,6 +439,12 @@ components:
             [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
     Animal:
       type: object
+      description: 'Describe one animal at a certain time. 
+        Use mandatory `public_identifier` to identify animal 
+        across services, add `alternative_identifier` if farmer 
+        uses additional farm-specific identifer.
+        If `pen_urn` is missing, this animal was not assigned to 
+        a pen in that time (e.g. at the pasture).'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
@@ -505,7 +511,6 @@ components:
         - date_created
         - date_last_updated
         - public_identifier
-        - pen_urn
         - species
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
