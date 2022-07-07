@@ -360,6 +360,9 @@ components:
       description: 'Uniform resource name of a field with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
     Barn:
       type: object
+      description: 
+        'This object describes the building where the animals are located. 
+        It can be described with optional geo-coordinates.'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
@@ -375,8 +378,10 @@ components:
           type: string
         description:
           type: string
-        geometry:
-          $ref: 'https://geojson.org/schema/GeoJSON.json'
+        geo_location:
+          $ref: 'https://geojson.org/schema/Point.json'
+        geo_layout:
+          $ref: 'http://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
@@ -389,13 +394,19 @@ components:
         archived: false
         name: '1st Barn new'
         description: ''
-        geometry:
+        geo_location:
+          type: 'Point'
+          coordinates: [51.0768128, 13.7025469]
+        geo_layout:
           type: 'Polygon'
           coordinates:
             [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
 
     Pen:
       type: object
+      description: 
+        'This describes a physical box where the animals are grouped in. 
+        This is located in a barn and can have its own geo-coordinates.'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
@@ -411,19 +422,17 @@ components:
           type: string
         description:
           type: string
-        max_number_animals:
-          type: integer
-          minimum: 0
         barn_urn:
           $ref: '#/components/schemas/URN'
-        geometry:
-          $ref: 'https://geojson.org/schema/GeoJSON.json'
+        geo_location:
+          $ref: 'https://geojson.org/schema/Point.json'
+        geo_layout:
+          $ref: 'http://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
         - date_last_updated
         - name
-        - number_animals
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00'
@@ -433,10 +442,10 @@ components:
         description: '1st Pen new stable left side'
         max_number_animals: 60
         barn_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        geometry:
-          type: 'Polygon'
-          coordinates:
-            [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
+    Species:
+          type: string
+          description: 'Species of animals'
+          enum: ['cattle', 'pig', 'chicken']
     Animal:
       type: object
       description: 'Describe one animal at a certain time. 
@@ -503,9 +512,7 @@ components:
           type: string
           description: 'The breed of the animal, or in the case of cross breed animals, the main breed percentages in the animal s breeding. **todo**: add anim with breeds like ADIS Codeset 2 - C_RASSE'
         species:
-          type: string
-          description: 'Species of that animal, **todo**: is there an official enum which we can use here?'
-          enum: ['cattle', 'pig', 'chicken']
+          $ref: '#/components/schemas/Species'
       required:
         - urn
         - date_created
