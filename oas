@@ -3,10 +3,11 @@ info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
   version: 0.0.1
+  contact:
+    email: j.voelker@fodjan.de
 tags:
   - name: Barn Information
   - name: Animal Information
-  - name: Feedgroup Information
   - name: Subscriptions
 security:
   - bearerAuth: []
@@ -50,6 +51,12 @@ paths:
       summary: List all pens
       tags:
         - Barn Information
+      parameters:
+        - name: barn_urn
+          in: query
+          description: return only pens in that barn
+          schema: 
+            $ref: '#/components/schemas/URN'
       responses:
         200:
           description: 'successful operation'
@@ -84,6 +91,19 @@ paths:
       summary: List all animals
       tags:
         - Animal Information
+      parameters:
+        - name: date
+          in: query
+          description: Get data for the given date. Default is NOW.
+          schema: 
+            type: string
+            format: date-time
+            example: '2022-02-02T12:22:00'
+        - name: pen_urn
+          in: query
+          description: Return all animals in the given pen
+          schema:
+            $ref: '#/components/schemas/URN'
       responses:
         200:
           description: 'successful operation'
@@ -93,40 +113,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Animal'
-    post:
-      summary: Create a new animal-entry
-      description: This will archive all existing entries for that animal. In response there is a new URN for this state. The existing URNs reflect still the old state of that animal. Missing fields will be added from the last entry of this animal.
-      tags:
-        - Animal Information
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Animal'
-      responses:
-        201:
-          description: 'saved successful'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    enum: [true]
-                  data:
-                    type: object
-                    properties:
-                      urn:
-                        $ref: '#/components/schemas/URN'
-                    additionalProperties: false
-                    required:
-                      - urn
-                    example:
-                      urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-                additionalProperties: false
-                required:
-                  - success
+
   /animals/{urn}:
     get:
       summary: Get single animal
@@ -139,6 +126,13 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/URN'
+        - name: date
+          in: query
+          description: Get data for the given date. Default is NOW.
+          schema: 
+            type: string
+            format: date-time
+            example: '2022-02-02T12:22:00'
       responses:
         200:
           description: 'successful operation'
@@ -147,40 +141,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Animal'
 
-  /feedgroups:
-    get:
-      summary: List all feedgroups
-      tags:
-        - Feedgroup Information
-      responses:
-        200:
-          description: 'successful operation'
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feedgroup'
-  /feedgroups/{urn}:
-    get:
-      summary: Get single feedgroup
-      tags:
-        - Feedgroup Information
-      parameters:
-        - name: urn
-          in: path
-          description: urn of the Feedgroup
-          required: true
-          schema:
-            $ref: '#/components/schemas/URN'
-      responses:
-        200:
-          description: 'successful operation'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feedgroup'
-
   /subscriptions:
     post:
       security:
@@ -188,7 +148,7 @@ paths:
       tags:
         - Subscriptions
       summary: Registers a notification URL
-      description: _optional_ Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
+      description: Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
       operationId: subscribe
       requestBody:
         description: subscription parameters
@@ -271,7 +231,7 @@ paths:
       tags:
         - Subscriptions
       summary: Refreshes an existing subscription
-      description: _optional_ Refreshes an existing subscription (refresh_subscription)
+      description: Refreshes an existing subscription (refresh_subscription)
       operationId: refresh_subscription
       parameters:
         - description: the id of a subscription
@@ -349,7 +309,7 @@ paths:
       tags:
         - Subscriptions
       summary: Cancels a subscription
-      description: _optional_ Cancels a previously created subscription (unsubscribe)
+      description: Cancels a previously created subscription (unsubscribe)
       operationId: unsubscribe
       parameters:
         - description: the id of a subscription
@@ -395,41 +355,12 @@ components:
     URN:
       type: string
       pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
-      description: 'Uniform resource name of a field with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service. Changes for each change to have historical correct linked data.'
-    Feedgroup:
-      type: object
-      properties:
-        urn:
-          $ref: '#/components/schemas/URN'
-        history_id:
-          type: string
-          description: 'uuid which will be valid also after a change'
-        date_created:
-          type: string
-          format: date-time
-        date_last_updated:
-          type: string
-          format: date-time
-        archived:
-          type: boolean
-        name:
-          type: string
-        description:
-          type: string
-      required:
-        - urn
-        - date_created
-        - date_last_updated
-        - name
-      example:
-        urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00'
-        date_last_update: '2022-05-04T00:00:42'
-        archived: false
-        name: 'Highyield 1'
-        description: '1st Pen new stable left side'
+      description: 'Uniform resource name of a field with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
     Barn:
       type: object
+      description: 
+        'This object describes the building where the animals are located. 
+        It can be described with optional geo-coordinates.'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
@@ -445,8 +376,10 @@ components:
           type: string
         description:
           type: string
-        geometry:
-          $ref: 'https://geojson.org/schema/GeoJSON.json'
+        geo_location:
+          $ref: 'https://geojson.org/schema/Point.json'
+        geo_layout:
+          $ref: 'https://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
@@ -459,19 +392,22 @@ components:
         archived: false
         name: '1st Barn new'
         description: ''
-        geometry:
+        geo_location:
+          type: 'Point'
+          coordinates: [51.0768128, 13.7025469]
+        geo_layout:
           type: 'Polygon'
           coordinates:
             [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
 
     Pen:
       type: object
+      description: 
+        'This describes a physical box where the animals are grouped in. 
+        This is located in a barn and can have its own geo-coordinates.'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
-        history_id:
-          type: string
-          description: 'uuid which will be valid also after a change'
         date_created:
           type: string
           format: date-time
@@ -484,21 +420,17 @@ components:
           type: string
         description:
           type: string
-        max_number_animals:
-          type: integer
-          minimum: 0
-        feedgroup_urn:
-          $ref: '#/components/schemas/URN'
         barn_urn:
           $ref: '#/components/schemas/URN'
-        geometry:
-          $ref: 'https://geojson.org/schema/GeoJSON.json'
+        geo_location:
+          $ref: 'https://geojson.org/schema/Point.json'
+        geo_layout:
+          $ref: 'https://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
         - date_last_updated
         - name
-        - number_animals
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00'
@@ -506,15 +438,19 @@ components:
         archived: false
         name: 'Highyield 1'
         description: '1st Pen new stable left side'
-        max_number_animals: 60
-        feedgroup_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         barn_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        geometry:
-          type: 'Polygon'
-          coordinates:
-            [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0]]]
+    Species:
+          type: string
+          description: 'Species of animals'
+          enum: ['cattle', 'pig', 'chicken']
     Animal:
       type: object
+      description: 'Describe one animal at a certain time. 
+        Use mandatory `public_identifier` to identify animal 
+        across services, add `alternative_identifier` if farmer 
+        uses additional farm-specific identifer.
+        If `pen_urn` is missing, this animal was not assigned to 
+        a pen in that time (e.g. at the pasture).'
       properties:
         urn:
           $ref: '#/components/schemas/URN'
@@ -533,7 +469,7 @@ components:
         public_identifier:
           type: string
           description: 'most animals are registered in public-registers, use that e.g. ear-number here'
-        farm_identifier:
+        alternative_identifier:
           type: string
           description: 'most farms have their own numbering for the cows, use that here'
         pen_urn:
@@ -573,15 +509,12 @@ components:
           type: string
           description: 'The breed of the animal, or in the case of cross breed animals, the main breed percentages in the animal s breeding. **todo**: add anim with breeds like ADIS Codeset 2 - C_RASSE'
         species:
-          type: string
-          description: 'Species of that animal, **todo**: is there an official enum which we can use here?'
-          enum: ['cattle', 'pig', 'chicken']
+          $ref: '#/components/schemas/Species'
       required:
         - urn
         - date_created
         - date_last_updated
         - public_identifier
-        - pen_urn
         - species
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
@@ -621,7 +554,6 @@ components:
           items:
             type: string
             enum:
-              - feedgroup
               - barn
               - pen
               - animal

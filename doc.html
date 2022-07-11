@@ -20,7 +20,8 @@ Author(s)                                 J. V&ouml;lker (fodjan GmbH)
 
 <h2>The "animal_data" ATLAS Service Template</h2>
 <div style="margin-left: -22px;">
-Abstract
+
+<h2>Abstract</h2>
 
 This document describes the specification for a general animal_data service whose purpose is to provide the synchronisation of a herd of animals and its organization structure between services. This service abstract from the different species and use only generic data for synchronization.
 </div>
@@ -53,26 +54,30 @@ A basic understanding of herd management.
 
 animal_data represents animals and also their organisation in pens and feedgroups. It is intentionally species-neutral because the basic structure is very similar for most of the species.
 
-Barns are the physical locations where animals are standing in so they are the basis for feeding, observation and many other interactions with the animals.
-
-Simple CRUD API to manage the existing feedgroups, barns and animals on a farm.
+Barns are the physical buildings where animals are standing in grouped in pens. Both are the basis for feeding, observation and many other interactions with the animals.
 
 <img src="doc/dairy_cows.png" style="width:450px" />
 <img src="doc/poultry.png" style="width:375px" />
 <img src="doc/pigs.png" style="width:375px" />
 
-Every animal is located in a pen - which is a physical seperated group of animals. Multiple pens may get the same ration - so they are grouped into a virtual feedgroup. All of that is grouped into a farm.
-Every relation is 1:n. That means every animals has at one point in time exactly one pen, one feedgroup and one farm.
-But there might also be the setup, that a partner doesn’t have the concept of feedgroups. For that case, pens are directly assigned to farms and the feedgroup-assignment is optional.
-todo: list some specific use-cases
+Every animal is located in a pen - which is a physical seperated group of animals. Barns, Pens and Animals are assigned into one farm.
+Every relation is 1:n. That means every animals has at one point in time exactly one pen, one barn and one farm.
+
+This service can be used as base-service to setup new software working with animals and update all the animal-movements regularly.
+
+On top of this service can be further services for feeding, animal-observation, veterinary treatment, insemination and so on.
 
 <h2>5 Service Template API Overview</h2>
 
-TBD
+The service provides resources to get the setup of barns and pens. Both include basic information like a name, description and optional geo-coordinates. If a barn or pen is not used anymore it will be archived.
+
+The animal-resources provide current and historical information about single animals. An animal can be identified by its public_identifier or the atlas-wide valid urn. The animal-resources will return the latest state of each animal when no date is set in the parameter. If a date is set, then the current state of animals at this time will be returned.
+
+The subscription-resources allow clients to register for changes instead of pulling periodically.
 
 <h2>6 Data Formats</h2>
 
-The diagram below illustrates the entity-relation model of animals, pen, barns and feedinggroups:
+The diagram below illustrates the entity-relation model of animals, pen and barns:
 
 <img src="doc/data_model.png" style="width:450px" />
 
@@ -80,9 +85,9 @@ Data recorded for a single animal follow the ICAR Guidelines (Section 1 General 
 
 Data per entity:
 
-- Farm: urn, date_created, date_last_update, name, address
-- Feedgroup: urn, date_created, date_last_update, name, description
-- Pen: urn, date_created, date_last_update, name, description, max_number_animals, farm_urn, feedgroup_urn Animal: urn, date_created, date_last_update, public_identifier, name, date_birth, pen_urn
+- Barn: urn, date_created, date_last_update, name, description, archived, geo_location, geo_layout
+- Pen: urn, date_created, date_last_update, name, description, archived, geo_location, geo_layout
+- Animal: urn, date_created, date_last_updated, archived, name, public_identifier, alternative_identifier, pen_urn, date_birth, date_arrival, arrival_reason, date_departure, departure_reason, original_public_identifier, sex, breed, species
 
 Other species-specific data will be handled by other services.
 
