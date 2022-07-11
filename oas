@@ -148,7 +148,7 @@ paths:
       tags:
         - Subscriptions
       summary: Registers a notification URL
-      description: Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
+      description: Registers a notification URL that will be invoked whenever changes occurs in animals (subscribe).
       operationId: subscribe
       requestBody:
         description: subscription parameters
@@ -161,6 +161,9 @@ paths:
                   type: string
                   format: uri
                   description: A subscription's notification_url is invoked with a POST (WITHOUT Authorization headers), containing a Notification request body (see schema below)
+                notification_authorization:
+                  type: string
+                  description: authorization string which will be included in every notification POST
               required:
                 - notification_url
               example:
@@ -355,7 +358,7 @@ components:
     URN:
       type: string
       pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
-      description: 'Uniform resource name of a field with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
+      description: 'Uniform resource name of an object with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
     Barn:
       type: object
       description: 
@@ -539,25 +542,11 @@ components:
           type: string
           format: date-time
           description: ISO 8601 UTC date/time at which the notification was originally triggered (regardless of retries)
-        urn:
-          type: string
-          description: the URN of the changed item (urn:<service_id>:<internal_id>)
-        event:
-          type: string
-          enum:
-            - CREATED
-            - DELETED
-            - UPDATED
-        changes:
-          description: attribute group where a change occurred (only present when event=UPDATED)
+        urns:
           type: array
-          items:
-            type: string
-            enum:
-              - barn
-              - pen
-              - animal
-            example: animal
+          description: collect all URNs of changed animals at this time
+          items: 
+            $ref: '#/components/schemas/URN'
     SimpleError:
       type: string
       description: Plain text message (may be empty).
