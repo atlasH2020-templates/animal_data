@@ -141,8 +141,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Animal'
 
-
-
   /subscriptions:
     post:
       security:
@@ -150,7 +148,7 @@ paths:
       tags:
         - Subscriptions
       summary: Registers a notification URL
-      description: _optional_ Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
+      description: Registers a notification URL that will be invoked whenever changes occurs in fields (subscribe).
       operationId: subscribe
       requestBody:
         description: subscription parameters
@@ -233,7 +231,7 @@ paths:
       tags:
         - Subscriptions
       summary: Refreshes an existing subscription
-      description: _optional_ Refreshes an existing subscription (refresh_subscription)
+      description: Refreshes an existing subscription (refresh_subscription)
       operationId: refresh_subscription
       parameters:
         - description: the id of a subscription
@@ -311,7 +309,7 @@ paths:
       tags:
         - Subscriptions
       summary: Cancels a subscription
-      description: _optional_ Cancels a previously created subscription (unsubscribe)
+      description: Cancels a previously created subscription (unsubscribe)
       operationId: unsubscribe
       parameters:
         - description: the id of a subscription
@@ -381,7 +379,7 @@ components:
         geo_location:
           $ref: 'https://geojson.org/schema/Point.json'
         geo_layout:
-          $ref: 'http://geojson.org/schema/Polygon.json'
+          $ref: 'https://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
@@ -427,7 +425,7 @@ components:
         geo_location:
           $ref: 'https://geojson.org/schema/Point.json'
         geo_layout:
-          $ref: 'http://geojson.org/schema/Polygon.json'
+          $ref: 'https://geojson.org/schema/Polygon.json'
       required:
         - urn
         - date_created
@@ -440,7 +438,6 @@ components:
         archived: false
         name: 'Highyield 1'
         description: '1st Pen new stable left side'
-        max_number_animals: 60
         barn_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
     Species:
           type: string
