@@ -523,31 +523,6 @@ components:
           description: 'most farms have their own numbering for the cows, use that here'
         pen_urn:
           $ref: '#/components/schemas/URN'
-        date_birth:
-          type: string
-          format: date-time
-          description: date when this animal was born
-
-        date_arrival:
-          type: string
-          format: date-time
-          description: date when the animal arrived at the current farm
-        arrival_reason:
-          type: string
-          description: reason why this animal arrives on the farm, **todo** extend enum
-          enum:
-            - 'born'
-            - 'buyed'
-        date_departure:
-          type: string
-          format: date-time
-          description: date when the animal left the current farm
-        departure_reason:
-          type: string
-          description: reason why this animal arrives on the farm, **todo** extend enum
-          enum:
-            - 'death'
-            - 'sold'
         original_public_identifier:
           type: string
           description: if the animal loose their identity or must otherwise be re-identified, this is the reference to the original identity
@@ -574,7 +549,6 @@ components:
         public_identifier: 'DE 123456789'
         farm_identifier: '674'
         pen_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_birth: '2021-03-06T12:34:45'
         sex: 'f'
         species: 'cattle'
 
@@ -606,6 +580,16 @@ components:
                   description: reason why this animal arrives on the farm, **todo** extend enum
                   enum:
                     - 'buyed'
+            - description: departure event
+              type: object
+              properties:
+                 departure_reason:
+                  type: string
+                  description: reason why this animal arrives on the farm, **todo** extend enum
+                  enum:
+                    - 'death'
+                    - 'sold'
+                    - 'slaughered'
             - description: weighing event
               type: object
               properties:
