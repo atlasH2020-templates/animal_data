@@ -2,7 +2,7 @@ openapi: '3.0.3'
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
-  version: 0.1.0
+  version: 0.1.1
   contact:
     email: j.voelker@fodjan.de
 tags:
@@ -140,6 +140,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Animal'
+
+  /events:
+    get:
+      summary: Get events for the animals
+      tags:
+        - Animal Information
+      parameters:
+        - name: date_start
+          in: query
+          required: true
+          schema: 
+            type: string
+            format: date-time
+        - name: date_end
+          in: query
+          description: default is NOW
+          schema: 
+            type: string
+            format: date-time
+        - name: animal_urn
+          in: query
+          schema: 
+            type: string
+        - name: category
+          in: query
+          schema: 
+            $ref: '#/components/schemas/EventCategory'
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
 
   /subscriptions:
     post:
@@ -359,6 +395,16 @@ components:
       type: string
       pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
       description: 'Uniform resource name of an object with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
+    EventCategory:
+      type: string
+      enum: 
+        - WEIGHING
+        - BIRTH
+        - DEATH
+        - ARRIVAL
+        - DEPARTURE
+        - CALVING
+        - MILK_REPORT
     Barn:
       type: object
       description: 
@@ -531,6 +577,59 @@ components:
         date_birth: '2021-03-06T12:34:45'
         sex: 'f'
         species: 'cattle'
+
+    Event:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: date when this event happened
+        category:
+          $ref: '#/components/schemas/EventCategory'
+        animal_urn:
+          $ref: '#/components/schemas/URN'
+        payload: 
+          oneOf:
+            - description: birth event
+              type: object
+              properties:
+                mother_public_identifier:
+                  type: string
+                father_public_identifier:
+                  type: string
+            - description: arrival event
+              type: object
+              properties:
+                 arrival_reason:
+                  type: string
+                  description: reason why this animal arrives on the farm, **todo** extend enum
+                  enum:
+                    - 'buyed'
+            - description: weighing event
+              type: object
+              properties:
+                weight:
+                  type: number
+                  description: weight of the animal in kg
+                dailyWeightGain:
+                  type: number
+                  description: daily gain of weight in kg
+              required: [weight]
+            - description: milk-report event
+              type: object
+              properties:
+                milk:
+                  type: number
+                  description: amount of milk given in kg
+                milkFat:
+                  type: number
+                  description: in %
+                milkProtein:
+                  type: number
+                  description: in %
+
+
     Notification:
       description: Payload sent when invoking notification_url
       type: object
