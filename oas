@@ -1,10 +1,11 @@
-openapi: '3.0.3'
+openapi: 3.0.3
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
   version: 0.1.1
-  contact:
-    email: j.voelker@fodjan.de
+externalDocs:
+  description: Service Template Document
+  url: "https://htmlpreview.github.io/?https://github.com/atlasH2020-templates/animal_data/blob/v0.1.1/doc.html"
 tags:
   - name: Barn Information
   - name: Animal Information
@@ -98,7 +99,7 @@ paths:
           schema: 
             type: string
             format: date-time
-            example: '2022-02-02T12:22:00'
+            example: '2022-02-02T12:22:00Z'
         - name: pen_urn
           in: query
           description: Return all animals in the given pen
@@ -132,7 +133,7 @@ paths:
           schema: 
             type: string
             format: date-time
-            example: '2022-02-02T12:22:00'
+            example: '2022-02-02T12:22:00Z'
       responses:
         200:
           description: 'successful operation'
@@ -226,7 +227,7 @@ paths:
               required:
                 - notification_url
               example:
-                notification_url: https://acme.com/my_notification_handler
+                notification_url: "https://acme.com/my_notification_handler"
       responses:
         '201':
           description: subscription created
@@ -251,18 +252,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '401':
           description: Invalid or missing credentials
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '409':
           description: Conflict
           content:
@@ -273,19 +268,12 @@ paths:
                 message: A subscription already exists for this notification_url
                 errors:
                   - 550ef2f0-02b6-40b2-bed9-e20816d20255
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
-              example: A subscription 550ef2f0-02b6-40b2-bed9-e20816d20255 already exists for this notification_url
         '429':
           description: Too many requests
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
   /subscriptions/{id}:
     patch:
       security:
@@ -326,45 +314,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '401':
           description: Invalid or missing credentials
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '404':
           description: The subscription was not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '410':
           description: The subscription is expired
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '429':
           description: Too many requests
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
     delete:
       security:
         - bearerAuth: []
@@ -390,27 +363,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '404':
           description: The subscription was not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
         '429':
           description: Too many requests
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedError'
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/SimpleError'
 
 components:
   schemas:
@@ -458,8 +422,8 @@ components:
         - name
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00'
-        date_last_update: '2022-05-04T00:00:42'
+        date_created: '2022-03-14T00:00:00Z'
+        date_last_update: '2022-05-04T00:00:42Z'
         archived: false
         name: '1st Barn new'
         description: ''
@@ -504,8 +468,8 @@ components:
         - name
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00'
-        date_last_update: '2022-05-04T00:00:42'
+        date_created: '2022-03-14T00:00:00Z'
+        date_last_update: '2022-05-04T00:00:42Z'
         archived: false
         name: 'Highyield 1'
         description: '1st Pen new stable left side'
@@ -564,8 +528,8 @@ components:
         - species
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00'
-        date_last_update: '2022-05-04T00:00:42'
+        date_created: '2022-03-14T00:00:00Z'
+        date_last_update: '2022-05-04T00:00:42Z'
         archived: false
         name: 'Marta'
         public_identifier: 'DE 123456789'
@@ -672,10 +636,6 @@ components:
           description: collect all URNs of changed animals at this time
           items: 
             $ref: '#/components/schemas/URN'
-    SimpleError:
-      type: string
-      description: Plain text message (may be empty).
-      example: optional error message
     DetailedError:
       type: object
       description: This defines the structure of an error payload when one is present. Actual messages and additional error information content may change from one implementation to another
@@ -683,6 +643,13 @@ components:
         message:
           type: string
           description: error description
+        status:
+            type: string
+            description: http error code
+        error_url:
+          type: string
+          format: uri
+          description: "A service's proprietary UI url where the user may navigate to view additional information or be prompted for additional actions to deal with the error. A well-behaved FMIS will present his users with a visual indication and the means to click on this link when this attribute is present."
         errors:
           type: array
           items:
@@ -691,11 +658,9 @@ components:
       required:
         - message
       example:
-        message: general error message
+        message: this is a sample error message
         errors:
-          - optional
-          - additional
-          - details
+          - this is an example of additional error information
   securitySchemes:
     bearerAuth:
       type: http

@@ -13,7 +13,7 @@
 <div class="header">
 ATLAS Service Template Specification
 Name                                                  animal_data
-Version                                                     0.1.0
+Version                                                     0.1.1
 Author(s)                                 J. V&ouml;lker (fodjan GmbH)
 </div>
 
@@ -121,10 +121,6 @@ Upon an excessive number of errors, services MAY automatically cancel a subscrip
 <h2>8.2 Subscription Notification</h2>
 
 The notification URL supplied by the subscriber MUST be invoked with an HTTP POST command.
-
-When a notification authorization parameter was supplied by the subscriber, the service MUST include a bearer token authentication in the form of an HTTP header:
-
-Authorization: bearer &lt;notification authorization&gt;
 
 A notification payload describing the type of event MUST be included:
 <pre>
