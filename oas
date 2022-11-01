@@ -176,7 +176,30 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
-
+  /weights:
+    get:
+      tags:
+        - Animal Information
+      summary: Get weights for a specific date
+      parameters:
+        - name: date
+          in: query
+          description: date
+          required: true
+          schema: 
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnimalWeight'
+      
+      
   /subscriptions:
     post:
       security:
@@ -398,7 +421,6 @@ components:
     EventCategory:
       type: string
       enum: 
-        - WEIGHING
         - BIRTH
         - DEATH
         - ARRIVAL
@@ -547,7 +569,7 @@ components:
         archived: false
         name: 'Marta'
         public_identifier: 'DE 123456789'
-        farm_identifier: '674'
+        alternative_identifier: '674'
         pen_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         sex: 'f'
         species: 'cattle'
@@ -590,16 +612,6 @@ components:
                     - 'death'
                     - 'sold'
                     - 'slaughered'
-            - description: weighing event
-              type: object
-              properties:
-                weight:
-                  type: number
-                  description: weight of the animal in kg
-                dailyWeightGain:
-                  type: number
-                  description: daily gain of weight in kg
-              required: [weight]
             - description: milk-report event
               type: object
               properties:
@@ -612,7 +624,37 @@ components:
                 milkProtein:
                   type: number
                   description: in %
-
+    AnimalWeight:
+      type: object
+      required:
+        - animal_urn
+        - average_weight
+        - median_weight
+        - date
+      properties:
+        animal_urn:
+          type: string
+          example: urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC
+          description: Uniform resource name of an object with the syntax urn:<service_id>:<internal_id>. <service_id> must be the urn of a valid and active ATLAS service.
+        average_weight:
+          description: average weight of the animal in kg
+          type: number
+        calculated_weight:
+          description: calculated weight of the animal in kg
+          type: number
+        daily_weight_gain:
+          description: daily gain of weight in kg
+          type: number
+        date:
+          type: string
+          format: date-time
+          example: '2022-03-14T00:00:00'
+        median_weight:
+          description: median weight of the animal in kg
+          type: number
+        public_identifier:
+          type: string
+          example: DE 123456789
 
     Notification:
       description: Payload sent when invoking notification_url
