@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
-  version: 0.1.1
+  version: 0.2.0
 externalDocs:
   description: Service Template Document
   url: "https://htmlpreview.github.io/?https://github.com/atlasH2020-templates/animal_data/blob/v0.1.1/doc.html"
