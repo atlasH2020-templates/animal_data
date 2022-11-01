@@ -13,8 +13,8 @@
 <div class="header">
 ATLAS Service Template Specification
 Name                                                  animal_data
-Version                                                     0.1.1
-Author(s)                                 J. V&ouml;lker (fodjan GmbH)
+Version                                                       0.2
+Author(s)                            J. V&ouml;lker (fodjan GmbH)
 </div>
 
 <h2>The "animal_data" ATLAS Service Template</h2>
@@ -66,6 +66,8 @@ This service can be used as base-service to setup new software working with anim
 
 On top of this service can be further services for feeding, animal-observation, veterinary treatment, insemination and so on.
 
+Different events around animals can be collected in such a base-service and shared via the events endpoint.
+
 <h2>5 Service Template API Overview</h2>
 
 The service provides resources to get the setup of barns and pens. Both include basic information like a name, description and optional geo-coordinates. If a barn or pen is not used anymore it will be archived.
@@ -86,7 +88,9 @@ Data per entity:
 
 - Barn: urn, date_created, date_last_update, name, description, archived, geo_location, geo_layout
 - Pen: urn, date_created, date_last_update, name, description, archived, geo_location, geo_layout
-- Animal: urn, date_created, date_last_updated, archived, name, public_identifier, alternative_identifier, pen_urn, date_birth, date_arrival, arrival_reason, date_departure, departure_reason, original_public_identifier, sex, breed, species
+- Animal: urn, date_created, date_last_updated, archived, name, public_identifier, alternative_identifier, pen_urn, original_public_identifier, sex, breed, species
+- Events: date, category, animal_urn and an event-specifc payload.
+- Weights: animal_urn, date, median_weight, average_weight, daily_weight_gain
 
 Other species-specific data will be handled by other services.
 
