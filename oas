@@ -590,6 +590,7 @@ components:
                   description: in %
     AnimalWeight:
       type: object
+      description: one weighting-entry may result out of different weightings over one day and will be calculated out of single weightings.
       required:
         - animal_urn
         - average_weight
@@ -611,14 +612,12 @@ components:
           type: number
         date:
           type: string
-          format: date-time
-          example: '2022-03-14T00:00:00'
+          format: date
+          example: '2022-03-14'
+          description: 'date of the weighting-intervall, it includes all single measurements of this hole day'
         median_weight:
           description: median weight of the animal in kg
           type: number
-        public_identifier:
-          type: string
-          example: DE 123456789
 
     Notification:
       description: Payload sent when invoking notification_url
