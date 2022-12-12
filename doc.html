@@ -66,13 +66,15 @@ This service can be used as base-service to setup new software working with anim
 
 On top of this service can be further services for feeding, animal-observation, veterinary treatment, insemination and so on.
 
-Different events around animals can be collected in such a base-service and shared via the events endpoint.
+Different time based events around animals can be collected in such a base-service and shared via the events endpoint.
 
 <h2>5 Service Template API Overview</h2>
 
 The service provides resources to get the setup of barns and pens. Both include basic information like a name, description and optional geo-coordinates. If a barn or pen is not used anymore it will be archived.
 
 The animal-resources provide current and historical information about single animals. An animal can be identified by its public_identifier or the atlas-wide valid urn. The animal-resources will return the latest state of each animal when no date is set in the parameter. If a date is set, then the current state of animals at this time will be returned.
+
+The events-endpoint collect time base events on each animal and the weight endpoints provide summarized weighting information about single animals.
 
 The subscription-resources allow clients to register for changes instead of pulling periodically.
 
@@ -96,7 +98,7 @@ Other species-specific data will be handled by other services.
 
 <h2>7 Access and Authentication</h2>
 
-Farmers MUST have an account setup on a animal_data service in order to authenticate and access API endpoints. The service implementor is responsible for the creation of accounts; it is not covered in the ATLAS Service Template specifications.
+Farmers MUST have an account setup on an animal_data service in order to authenticate and access API endpoints. The service implementor is responsible for the creation of accounts; it is not covered in the ATLAS Service Template specifications.
 
 Unless specifically documented in the OpenAPI specifications, all operation must include credentials in form of Bearer authentication (also called token authentication). Clients can obtain an access token on behalf of their user from the service's authorization server (see ATLAS service pairing).
 

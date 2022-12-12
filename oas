@@ -563,7 +563,7 @@ components:
               properties:
                  arrival_reason:
                   type: string
-                  description: reason why this animal arrives on the farm, **todo** extend enum
+                  description: reason why this animal arrives on the farm
                   enum:
                     - 'buyed'
             - description: departure event
@@ -571,7 +571,7 @@ components:
               properties:
                  departure_reason:
                   type: string
-                  description: reason why this animal arrives on the farm, **todo** extend enum
+                  description: reason why this animal arrives on the farm.
                   enum:
                     - 'death'
                     - 'sold'
@@ -602,13 +602,13 @@ components:
           example: urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC
           description: Uniform resource name of an object with the syntax urn:<service_id>:<internal_id>. <service_id> must be the urn of a valid and active ATLAS service.
         average_weight:
-          description: average weight of the animal in kg
+          description: Average value of the weight readings for the animal ont the date specified in kg.
           type: number
         calculated_weight:
-          description: calculated weight of the animal in kg
+          description: This is the projection based on existing data and using Gompertz growth model. In kg.
           type: number
         daily_weight_gain:
-          description: daily gain of weight in kg
+          description: Daily gain of weight in kg over the previous two weeks of the specified date.
           type: number
         date:
           type: string
@@ -616,7 +616,7 @@ components:
           example: '2022-03-14'
           description: 'date of the weighting-intervall, it includes all single measurements of this hole day'
         median_weight:
-          description: median weight of the animal in kg
+          description: Median value of the weight readings for the animal ont the date specified in kg.
           type: number
 
     Notification:
