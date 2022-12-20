@@ -191,7 +191,7 @@ paths:
             type: string
             format: date-time
       responses:
-        '200':
+        200:
           description: successful operation
           content:
             application/json:
@@ -292,7 +292,7 @@ paths:
             type: string
             format: string
       responses:
-        '200':
+        200:
           description: successful operation
           content:
             application/json:
@@ -565,13 +565,13 @@ components:
                   type: string
                   description: reason why this animal arrives on the farm
                   enum:
-                    - 'buyed'
+                    - 'bought'
             - description: departure event
               type: object
               properties:
                  departure_reason:
                   type: string
-                  description: reason why this animal arrives on the farm.
+                  description: reason why this animal departs from the farm.
                   enum:
                     - 'death'
                     - 'sold'
@@ -590,7 +590,7 @@ components:
                   description: in %
     AnimalWeight:
       type: object
-      description: one weighting-entry may result out of different weightings over one day and will be calculated out of single weightings.
+      description: one weighing-entry may result out of different weighings over one day and will be calculated out of single weighings.
       required:
         - animal_urn
         - average_weight
@@ -598,9 +598,7 @@ components:
         - date
       properties:
         animal_urn:
-          type: string
-          example: urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC
-          description: Uniform resource name of an object with the syntax urn:<service_id>:<internal_id>. <service_id> must be the urn of a valid and active ATLAS service.
+          $ref: '#/components/schemas/URN'
         average_weight:
           description: Average value of the weight readings for the animal ont the date specified in kg.
           type: number
@@ -614,7 +612,7 @@ components:
           type: string
           format: date
           example: '2022-03-14'
-          description: 'date of the weighting-intervall, it includes all single measurements of this hole day'
+          description: 'date of the weighing-intervall, it includes all single measurements of this whole day'
         median_weight:
           description: Median value of the weight readings for the animal ont the date specified in kg.
           type: number
