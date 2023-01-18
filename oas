@@ -133,7 +133,7 @@ paths:
           schema: 
             type: string
             format: date-time
-            example: '2022-02-02T12:22:00Z'
+            example: '2022-02-02T12:22:00+00'
       responses:
         200:
           description: 'successful operation'
@@ -155,14 +155,14 @@ paths:
           schema: 
             type: string
             format: date-time
-            example: "2023-01-01T00:00:00"
+            example: "2023-01-01T00:00:00+00"
         - name: date_end
           in: query
           description: Filter events before this date. Default is NOW. ISO8601
           schema: 
             type: string
             format: date-time
-            example: "2023-01-20T13:37:00"
+            example: "2023-01-20T13:37:00+00"
         - name: animal_urn
           in: query
           description: Filter events assigned to that animal
@@ -195,7 +195,7 @@ paths:
           schema: 
             type: string
             format: date
-            example: "2023-01-20"
+            example: "2023-01-20T00:00:00+00"
       responses:
         200:
           description: successful operation
@@ -251,7 +251,7 @@ paths:
                     description: date at which the subscription expires (auto-delete)
               example:
                 id: 550ef2f0-02b6-40b2-bed9-e20816d20255
-                expiration_date: '2021-05-23T18:25:43.511Z'
+                expiration_date: '2021-05-23T18:25:43+00'
         '400':
           description: Invalid or missing parameters
           content:
@@ -313,7 +313,7 @@ paths:
                     description: ISO 8601 UTC date/time at which the subscription expires (auto-delete)
               example:
                 id: 550ef2f0-02b6-40b2-bed9-e20816d20255
-                expiration_date: '2021-06-23T18:25:43.511Z'
+                expiration_date: '2021-06-23T18:25:43+00'
         '400':
           description: Invalid or missing parameters
           content:
@@ -430,7 +430,7 @@ components:
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: '1st Barn new'
         description: ''
@@ -475,8 +475,8 @@ components:
         - name
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_created: '2022-03-14T00:00:00+00'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Highyield 1'
         description: '1st Pen new stable left side'
@@ -535,8 +535,8 @@ components:
         - species
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_created: '2022-03-14T00:00:00+00'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Marta'
         public_identifier: 'DE 123456789'
@@ -596,7 +596,7 @@ components:
                   type: number
                   description: in %
       example: 
-        date: "2023-01-18T08:32:56.809Z"
+        date: "2023-01-18T08:32:56.809+00"
         category: "BIRTH"
         animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
         payload:
@@ -631,7 +631,7 @@ components:
           description: Median value of the weight readings for the animal ont the date specified in kg.
           type: number
       example: 
-        date: "2023-01-20T08:32:56.809Z"
+        date: "2023-01-20T08:32:56+00"
         animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
         average_weight: 671.1
         calculated_weight: 672.3
