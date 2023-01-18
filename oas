@@ -151,21 +151,26 @@ paths:
         - name: date_start
           in: query
           required: true
+          description: Filter only events after that date. ISO8601
           schema: 
             type: string
             format: date-time
+            example: "2023-01-01T00:00:00"
         - name: date_end
           in: query
-          description: default is NOW
+          description: Filter events before this date. Default is NOW. ISO8601
           schema: 
             type: string
             format: date-time
+            example: "2023-01-20T13:37:00"
         - name: animal_urn
           in: query
+          description: Filter events assigned to that animal
           schema: 
-            type: string
+            $ref: '#/components/schemas/URN'
         - name: category
           in: query
+          description: Filter events in a special event-category
           schema: 
             $ref: '#/components/schemas/EventCategory'
       responses:
@@ -185,11 +190,12 @@ paths:
       parameters:
         - name: date
           in: query
-          description: date
+          description: Filter weighings on this date. ISO8601
           required: true
           schema: 
             type: string
-            format: date-time
+            format: date
+            example: "2023-01-20"
       responses:
         200:
           description: successful operation
@@ -382,6 +388,7 @@ components:
       type: string
       pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
       description: 'Uniform resource name of an object with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
+      example: 'urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1'
     EventCategory:
       type: string
       enum: 
@@ -544,7 +551,7 @@ components:
         date:
           type: string
           format: date-time
-          description: date when this event happened
+          description: Date when this event happened. ISO8601
         category:
           $ref: '#/components/schemas/EventCategory'
         animal_urn:
@@ -588,6 +595,13 @@ components:
                 milkProtein:
                   type: number
                   description: in %
+      example: 
+        date: "2023-01-18T08:32:56.809Z"
+        category: "BIRTH"
+        animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
+        payload:
+          mother_public_identifier: "DE12345667"
+          father_public_identifier: "DE683920"
     AnimalWeight:
       type: object
       description: one weighing-entry may result out of different weighings over one day and will be calculated out of single weighings.
@@ -616,6 +630,13 @@ components:
         median_weight:
           description: Median value of the weight readings for the animal ont the date specified in kg.
           type: number
+      example: 
+        date: "2023-01-20T08:32:56.809Z"
+        animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
+        average_weight: 671.1
+        calculated_weight: 672.3
+        median_weight: 670.0
+        daily_weight_gain: 1.02
 
     Notification:
       description: Payload sent when invoking notification_url
