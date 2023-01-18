@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
-  version: 0.1.1
+  version: 0.2.0
 externalDocs:
   description: Service Template Document
   url: "https://htmlpreview.github.io/?https://github.com/atlasH2020-templates/animal_data/blob/v0.1.1/doc.html"
@@ -133,7 +133,7 @@ paths:
           schema: 
             type: string
             format: date-time
-            example: '2022-02-02T12:22:00Z'
+            example: '2022-02-02T12:22:00+00'
       responses:
         200:
           description: 'successful operation'
@@ -142,6 +142,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/Animal'
 
+  /events:
+    get:
+      summary: Get events for the animals
+      tags:
+        - Animal Information
+      parameters:
+        - name: date_start
+          in: query
+          required: true
+          description: Filter only events after that date. ISO8601
+          schema: 
+            type: string
+            format: date-time
+            example: "2023-01-01T00:00:00+00"
+        - name: date_end
+          in: query
+          description: Filter events before this date. Default is NOW. ISO8601
+          schema: 
+            type: string
+            format: date-time
+            example: "2023-01-20T13:37:00+00"
+        - name: animal_urn
+          in: query
+          description: Filter events assigned to that animal
+          schema: 
+            $ref: '#/components/schemas/URN'
+        - name: category
+          in: query
+          description: Filter events in a special event-category
+          schema: 
+            $ref: '#/components/schemas/EventCategory'
+      responses:
+        200:
+          description: 'successful operation'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+  /weights:
+    get:
+      tags:
+        - Animal Information
+      summary: Get weights for a specific date
+      parameters:
+        - name: date
+          in: query
+          description: Filter weighings on this date. ISO8601
+          required: true
+          schema: 
+            type: string
+            format: date
+            example: "2023-01-20T00:00:00+00"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnimalWeight'
+      
+      
   /subscriptions:
     post:
       security:
@@ -186,7 +251,7 @@ paths:
                     description: date at which the subscription expires (auto-delete)
               example:
                 id: 550ef2f0-02b6-40b2-bed9-e20816d20255
-                expiration_date: '2021-05-23T18:25:43.511Z'
+                expiration_date: '2021-05-23T18:25:43+00'
         '400':
           description: Invalid or missing parameters
           content:
@@ -233,7 +298,7 @@ paths:
             type: string
             format: string
       responses:
-        '200':
+        200:
           description: successful operation
           content:
             application/json:
@@ -248,7 +313,7 @@ paths:
                     description: ISO 8601 UTC date/time at which the subscription expires (auto-delete)
               example:
                 id: 550ef2f0-02b6-40b2-bed9-e20816d20255
-                expiration_date: '2021-06-23T18:25:43.511Z'
+                expiration_date: '2021-06-23T18:25:43+00'
         '400':
           description: Invalid or missing parameters
           content:
@@ -323,6 +388,16 @@ components:
       type: string
       pattern: "^urn:[a-z][a-z0-9_.\\-]*:[\\w-.]+"
       description: 'Uniform resource name of an object with the syntax `urn:<service_id>:<internal_id>`. <service_id> must be the urn of a valid and active ATLAS service.'
+      example: 'urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1'
+    EventCategory:
+      type: string
+      enum: 
+        - BIRTH
+        - DEATH
+        - ARRIVAL
+        - DEPARTURE
+        - CALVING
+        - MILK_REPORT
     Barn:
       type: object
       description: 
@@ -355,7 +430,7 @@ components:
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: '1st Barn new'
         description: ''
@@ -400,8 +475,8 @@ components:
         - name
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_created: '2022-03-14T00:00:00+00'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Highyield 1'
         description: '1st Pen new stable left side'
@@ -441,31 +516,6 @@ components:
           description: 'most farms have their own numbering for the cows, use that here'
         pen_urn:
           $ref: '#/components/schemas/URN'
-        date_birth:
-          type: string
-          format: date-time
-          description: date when this animal was born
-
-        date_arrival:
-          type: string
-          format: date-time
-          description: date when the animal arrived at the current farm
-        arrival_reason:
-          type: string
-          description: reason why this animal arrives on the farm, **todo** extend enum
-          enum:
-            - 'born'
-            - 'buyed'
-        date_departure:
-          type: string
-          format: date-time
-          description: date when the animal left the current farm
-        departure_reason:
-          type: string
-          description: reason why this animal arrives on the farm, **todo** extend enum
-          enum:
-            - 'death'
-            - 'sold'
         original_public_identifier:
           type: string
           description: if the animal loose their identity or must otherwise be re-identified, this is the reference to the original identity
@@ -485,16 +535,109 @@ components:
         - species
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42Z'
+        date_created: '2022-03-14T00:00:00+00'
+        date_last_update: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Marta'
         public_identifier: 'DE 123456789'
-        farm_identifier: '674'
+        alternative_identifier: '674'
         pen_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
-        date_birth: '2021-03-06T12:34:45Z'
         sex: 'f'
         species: 'cattle'
+
+    Event:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: Date when this event happened. ISO8601
+        category:
+          $ref: '#/components/schemas/EventCategory'
+        animal_urn:
+          $ref: '#/components/schemas/URN'
+        payload: 
+          oneOf:
+            - description: birth event
+              type: object
+              properties:
+                mother_public_identifier:
+                  type: string
+                father_public_identifier:
+                  type: string
+            - description: arrival event
+              type: object
+              properties:
+                 arrival_reason:
+                  type: string
+                  description: reason why this animal arrives on the farm
+                  enum:
+                    - 'bought'
+            - description: departure event
+              type: object
+              properties:
+                 departure_reason:
+                  type: string
+                  description: reason why this animal departs from the farm.
+                  enum:
+                    - 'death'
+                    - 'sold'
+                    - 'slaughered'
+            - description: milk-report event
+              type: object
+              properties:
+                milk:
+                  type: number
+                  description: amount of milk given in kg
+                milkFat:
+                  type: number
+                  description: in %
+                milkProtein:
+                  type: number
+                  description: in %
+      example: 
+        date: "2023-01-18T08:32:56.809+00"
+        category: "BIRTH"
+        animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
+        payload:
+          mother_public_identifier: "DE12345667"
+          father_public_identifier: "DE683920"
+    AnimalWeight:
+      type: object
+      description: one weighing-entry may result out of different weighings over one day and will be calculated out of single weighings.
+      required:
+        - animal_urn
+        - average_weight
+        - median_weight
+        - date
+      properties:
+        animal_urn:
+          $ref: '#/components/schemas/URN'
+        average_weight:
+          description: Average value of the weight readings for the animal ont the date specified in kg.
+          type: number
+        calculated_weight:
+          description: This is the projection based on existing data and using Gompertz growth model. In kg.
+          type: number
+        daily_weight_gain:
+          description: Daily gain of weight in kg over the previous two weeks of the specified date.
+          type: number
+        date:
+          type: string
+          format: date
+          example: '2022-03-14'
+          description: 'date of the weighing-intervall, it includes all single measurements of this whole day'
+        median_weight:
+          description: Median value of the weight readings for the animal ont the date specified in kg.
+          type: number
+      example: 
+        date: "2023-01-20T08:32:56+00"
+        animal_urn: "urn:animal_data:69d4a4ec-e8a4-4768-a299-14a7a9acd1b1"
+        average_weight: 671.1
+        calculated_weight: 672.3
+        median_weight: 670.0
+        daily_weight_gain: 1.02
+
     Notification:
       description: Payload sent when invoking notification_url
       type: object
