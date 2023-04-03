@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: ATLAS Service Template - Animal data
   description: Setup and synchronize the animals of a farm and their organization in groups and pens.
-  version: 0.2.0
+  version: 0.2.1
 externalDocs:
   description: Service Template Document
   url: "https://htmlpreview.github.io/?https://github.com/atlasH2020-templates/animal_data/blob/v0.1.1/doc.html"
@@ -195,7 +195,7 @@ paths:
           schema: 
             type: string
             format: date
-            example: "2023-01-20T00:00:00+00"
+            example: "2023-01-20"
       responses:
         200:
           description: successful operation
@@ -430,7 +430,7 @@ components:
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00Z'
-        date_last_update: '2022-05-04T00:00:42+00'
+        date_last_updated: '2022-05-04T00:00:42+00'
         archived: false
         name: '1st Barn new'
         description: ''
@@ -458,10 +458,17 @@ components:
           format: date-time
         archived:
           type: boolean
+          description: "If true, this pen is no longer in use."
         name:
           type: string
+          description: Short name of the pen.
         description:
           type: string
+          description: Longer description of the pen.
+        max_animals:
+          type: integer
+          minimum: 1
+          description: "Maximum number of animals in this pen."
         barn_urn:
           $ref: '#/components/schemas/URN'
         geo_location:
@@ -476,9 +483,10 @@ components:
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00+00'
-        date_last_update: '2022-05-04T00:00:42+00'
+        date_last_updated: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Highyield 1'
+        max_animals: 50
         description: '1st Pen new stable left side'
         barn_urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
     Species:
@@ -524,7 +532,7 @@ components:
           enum: ['f', 'm']
         breed:
           type: string
-          description: 'The breed of the animal, or in the case of cross breed animals, the main breed percentages in the animal s breeding. **todo**: add anim with breeds like ADIS Codeset 2 - C_RASSE'
+          description: 'The breed of the animal. In the case of cross breed animals, use the main breed. For cattle use the names out of the ICAR standard: https://interbull.org/ib/icarbreedcodes'
         species:
           $ref: '#/components/schemas/Species'
       required:
@@ -536,7 +544,7 @@ components:
       example:
         urn: 'urn:animal_service:FDBE6F55-6179-4B88-9177-4AFBED33ADAC'
         date_created: '2022-03-14T00:00:00+00'
-        date_last_update: '2022-05-04T00:00:42+00'
+        date_last_updated: '2022-05-04T00:00:42+00'
         archived: false
         name: 'Marta'
         public_identifier: 'DE 123456789'
@@ -595,6 +603,10 @@ components:
                 milkProtein:
                   type: number
                   description: in %
+      required:
+        - date
+        - category
+        - animal_urn
       example: 
         date: "2023-01-18T08:32:56.809+00"
         category: "BIRTH"
